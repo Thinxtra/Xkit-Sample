@@ -1,0 +1,2 @@
+# Xkit-Sample
+Sample Code for the Xkit. The perfect way to get started with Sigfox, the Thinxtra devkit Xkit boasts a full suite of features and accessories to empower anyone to set up an IoT solution, even with very little hardware experience. Perfect for start-ups, design houses, universities and schools, the kit has everything you need to hit the ground running using the globally available Sigfox network. 
