@@ -1,0 +1,36 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+acceleration_xyz KEYWORD1
+Tsensors 		 KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init		 	KEYWORD2
+getTemp			KEYWORD2
+getPressure		KEYWORD2
+getPhoto		KEYWORD2
+getAccX			KEYWORD2
+getAccY			KEYWORD2
+getAccZ			KEYWORD2
+getAccXYZ		KEYWORD2
+interuptReed 	KEYWORD2
+setButton		KEYWORD2
+Byte2Hex		KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

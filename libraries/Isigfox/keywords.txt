@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+recvMsg			KEYWORD1
+pinIO	 		KEYWORD1
+Isigfox			KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init		 	KEYWORD2
+configIO		KEYWORD2
+testComms		KEYWORD2
+sendPayload		KEYWORD2
+sendMessage		KEYWORD2
+getZone			KEYWORD2
+setZone			KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+RCZ1			LITERAL1
+RCZ2			LITERAL1
+RCZ3			LITERAL1
+RCZ4			LITERAL1
