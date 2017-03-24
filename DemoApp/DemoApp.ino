@@ -50,7 +50,6 @@ void setup() {
   delay(500); while (Serial.available()){ Serial.read(); delay(10);}
   Isigfox->testComms();
   delay(500); while (Serial.available()){ Serial.read(); delay(10);}
-  Isigfox->configIO(NULL);
   GetDeviceID();
  
   // Init sensors on Thinxtra Module
