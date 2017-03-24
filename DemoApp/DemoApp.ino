@@ -121,13 +121,11 @@ void Send_Sensors(){
 
 void reedIR(){
   Serial.println("Reed");
-  Send_Sensors();
   timer.setTimeout(200, Send_Sensors); // send a Sigfox message after get ou IRS
 }
 
 void buttonIR(){
   Serial.println("Button");
-  Send_Sensors();
   timer.setTimeout(200, Send_Sensors); // send a Sigfox message after get ou IRS
 }
 
