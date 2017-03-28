@@ -13,11 +13,7 @@
 #define Tsensors_h
 #include "Arduino.h"
 
-/** Structure of IO pins to be set for the communication with Sigfox module
-	@param x_g	the type of Sigfox module
-	@param y_g		the IO pin of Arduino for MISO SPI
-	@param x_g		the IO pin of Arduino for MOSI SPI
-*/
+/** Structure of the output acceleration in 3D */
 typedef struct {
 	float x_g=0;	/*!< The acceleration on the X axis */
 	float y_g=0;	/*!< The acceleration on the Y axis */
@@ -28,64 +24,74 @@ typedef struct {
 /** Class for Xkit sensors*/
 class Tsensors{
 public:
-	Tsensors(){}
+    Tsensors(){}
     ~Tsensors(){}
 	
-	/** Initialization process for sensors on Xkit
-		@return								0 if successful, -1 if failed
-	*/
+    /** Initialization process for sensors on Xkit
+	@return								0 if successful, -1 if failed
+    */
     int init();
 	
-	/** Get the current ambient temperature
-		@return								a float value of the current ambient temperature
-	*/
-	float getTemp();
 	
-	/** Get the current ambient pressure
-		@return								a float value of the current ambient pressure
-	*/
-	float getPressure();
+    /** Get the current ambient temperature
+	@return								a float value of the current ambient temperature
+    */
+    float getTemp();
 	
-	/** Get the current ambient light
-		@return								a float value of the current output voltage from the photovoltaic (PNJ4K01F)
-	*/
-	float getPhoto();
+
+    /** Get the current ambient pressure
+	@return								a float value of the current ambient pressure
+    */
+    float getPressure();
 	
-	/** Get the current acceleration of the X axis
-		@return								a float value of the current acceleration of the X axis
-	*/
-	float getAccX();
 	
-	/** Get the current acceleration of the Y axis
-		@return								a float value of the current acceleration of the Y axis
-	*/
-	float getAccY();
+    /** Get the current ambient light
+	@return								a float value of the current output voltage from the photovoltaic (PNJ4K01F)
+    */
+    float getPhoto();
 	
-	/** Get the current acceleration of the Z axis
-		@return								a float value of the current acceleration of the Z axis
-	*/
-	float getAccZ();
+    /** Get the current acceleration of the X axis
+	@return								a float value of the current acceleration of the X axis
+    */
+    float getAccX();
 	
-	/** Get the current acceleration on all axis
-		@return								a structured value of the current acceleration on all axes
-	*/
-	acceleration_xyz getAccXYZ();
 	
-	/** Set a callback which is triggered on a button press
-		@param *service(void)				a function pointer which points to the desired callback
-	*/
-	void setButton(void (*service(void)));
+    /** Get the current acceleration of the Y axis
+	@return								a float value of the current acceleration of the Y axis
+    */
+    float getAccY();
 	
-	/** Set a callback which is triggered when a magnet is close to the reed switch
-		@param *InterruptService(void)		a function pointer which points to the desired callback
-	*/
-	void  setReed(void (*InterruptService(void)));
 	
-	/** Convert an array of bytes to an array of hex character
-		@param *input						a pointer to the array of byte to convert
-		@param length						length of the array of byte to convert
-	*/
-	char* Byte2Hex(unsigned char* input, int length);
+    /** Get the current acceleration of the Z axis
+	@return								a float value of the current acceleration of the Z axis
+    */
+    float getAccZ();
+	
+	
+    /** Get the current acceleration on all three axes
+	@return								a structured value of the current acceleration on all three axes
+    */
+    acceleration_xyz getAccXYZ();
+	
+	
+    /** Set a callback which is triggered on a button press
+	@param *service(void)				a function pointer which points to the desired callback
+    */
+    void setButton(void (*service(void)));
+	
+	
+    /** Set a callback which is triggered when a magnet is close to the reed switch
+	@param *InterruptService(void)		a function pointer which points to the desired callback
+    */
+    void  setReed(void (*InterruptService(void)));
+	
+	
+    /** Convert an array of bytes to an array of hex character
+	@param *input						a pointer to the array of byte to convert
+	@param length						length of the array of byte to convert
+	return							a pointer to the character array of the converted bytes
+    */
+    char* Byte2Hex(unsigned char* input, int length);
 	
 private:		
 	const int REG_OUT_X_MSB = 0x01;
