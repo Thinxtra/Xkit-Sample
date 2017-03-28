@@ -35,6 +35,7 @@ private:
 	void wakeDeepSleep();
 	int strCmp(char *in1, char *in2, int len);
 	void printRecv(char* in, int len);
+	void clearBuffer();
 	
 	static const int BUFFER_SIZE = 0x18;
 	
