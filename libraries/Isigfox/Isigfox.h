@@ -57,34 +57,34 @@ public:
 	*/
     virtual void configIO(pinIO pin)=0;
 	
-	/** Test communication with the Sigfox module 
-		@return			0 if successful, -1 if failed
-	*/
-	virtual int testComms()=0;
-	
-	/** Send a Sigfox frame 
-		@param outData	a pointer to an array of bytes to send
-		@param len		the length of the array of bytes to send
-		@return			0 if successful, -1 if failed
-	*/
-	virtual recvMsg sendPayload(char *outData, int len) = 0;
-	
-	/** Send a command to the Sigfox module
-		@param pin		a pointer to an array of bytes to send
-		@param len		the length of the array of bytes to send
-		@return			0 if successful, -1 if failed
-	*/
-	virtual recvMsg sendMessage(char *outData, int len) = 0;
-	
-	/** Get the zone of the current Sigfox module
-		@return			1 if RCZ1, 2 if RCZ2, 3 if RCZ3, or 4 if RCZ4
-	*/
-	virtual int getZone() = 0;
-	
-	/** Set the zone of the current Sigfox module
-		@return			-1, not implemented
-	*/
-	virtual int setZone() = 0;
+    /** Test communication with the Sigfox module 
+    	@return			0 if successful, -1 if failed
+    */
+    virtual int testComms()=0;
+
+    /** Send a Sigfox frame 
+    	@param outData		a pointer to an array of bytes to send
+    	@param len		[0...12], the length of the array of bytes to send 
+	@return			0 if successful, -1 if failed
+    */
+    virtual recvMsg sendPayload(char *outData, int len) = 0;
+
+    /** Send a command to the Sigfox module
+    	@param pin		a pointer to an array of bytes to send
+    	@param len		the length of the array of bytes to send
+    	@return			0 if successful, -1 if failed
+    */
+    virtual recvMsg sendMessage(char *outData, int len) = 0;
+
+    /** Get the zone of the current Sigfox module
+	@return			1 if RCZ1, 2 if RCZ2, 3 if RCZ3, or 4 if RCZ4
+    */
+    virtual int getZone() = 0;
+
+    /** Set the zone of the current Sigfox module
+	@return			-1, not implemented
+    */
+    virtual int setZone() = 0;
 };
 
 #endif
