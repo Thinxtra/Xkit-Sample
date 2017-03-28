@@ -49,7 +49,7 @@ int WISOL::init(){
 			break;
 		}
 	}
-	delay(50); while (Serial.available()){ Serial.read(); delay(10);}
+	clearBuffer();
 	return 0;
 }
 
@@ -83,7 +83,7 @@ void WISOL::printRecv(char *in, int len){
 		Serial.print(in[i]);
 	}
 	Serial.println("");
-	delay(50); while (Serial.available()){ Serial.read(); delay(10);}
+	clearBuffer();
 }
 
 
@@ -116,7 +116,7 @@ int WISOL::testComms(){
 		return 1;
 	}
 	
-	delay(50); while (Serial.available()){ Serial.read(); delay(10);}
+	clearBuffer();
 }
 
 /*
@@ -134,7 +134,7 @@ recvMsg WISOL::sendPayload(char *inData, int len){
 	recvMsg RecvMsg;
 	
 	if (bytelen<=12){
-		delay(50); while (Serial.available()){ Serial.read(); delay(10);}
+		clearBuffer();
 		prepareZone();
 		Buffer_Init();
 		for (int i=0; i<headerLen; i++){
@@ -164,7 +164,7 @@ recvMsg sendMessage(char *inData, int len){
 recvMsg WISOL::sendMessage(char *inData, int len){
 	recvMsg RecvMsg;
 	
-	delay(50); while (Serial.available()){ Serial.read(); delay(10);}
+	clearBuffer();
 	Buffer_Init(); // prepare buffer
 	for (int i=0; i<len; i++){
 		Serial.print(inData[i]); // send message
@@ -223,7 +223,10 @@ recvMsg WISOL::getRecvMsg(){
 	int count = 1;
 	
 	// Wait for the incomming message
-	while (!Serial.available() && count <= 10) {count++; delay(100);}; delay (20); 
+	while (Serial.available()==0 && count <= 10) {
+		count++;
+		delay(100);
+	}
 	
 	// Prepare receive messge format
 	RecvMsg.len = Serial.available();
@@ -234,7 +237,7 @@ recvMsg WISOL::getRecvMsg(){
 		}
 	}
 	
-	while (Serial.available()){ Serial.read();} // Clear any remain characters
+	clearBuffer();
 	
 	return RecvMsg;	
 }
@@ -255,4 +258,12 @@ void WISOL::wakeDeepSleep(){
 	digitalWrite(3, HIGH);
 	pinMode(3, INPUT_PULLUP);
 	EIMSK |= 0x02; // enable interrupt 1
+}
+
+void WISOL::clearBuffer(){
+	delay(50);
+	while (Serial.available()!=0){
+		Serial.read();
+		delay(10);
+	}
 }
