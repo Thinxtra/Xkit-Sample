@@ -45,20 +45,21 @@ class Isigfox{
 public:
 	Isigfox(){}
     virtual ~Isigfox(){}
-	/** Prepare Sigfox communication
-		@return			0 if successful, -1 if failed
-		TODO	change to 1 -> -1
-	*/
+	
+    /** Prepare Sigfox communication
+	@return			0 if successful, -1 if failed
+	TODO	change to 1 -> -1
+    */
     virtual int init()=0;
 	
-	/** Set IO pin for Sigfox Communication 
-		@param pin		a structure containing pin configuration
-		TODO	need to define pin as a structure
-	*/
+    /** Set IO pin for Sigfox Communication 
+	@param pin		a structure containing pin configuration
+	TODO	need to define pin as a structure
+    */
     virtual void configIO(pinIO pin)=0;
 	
     /** Test communication with the Sigfox module 
-    	@return			0 if successful, -1 if failed
+    	@return			-1, not implemented
     */
     virtual int testComms()=0;
 
