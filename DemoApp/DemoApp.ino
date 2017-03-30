@@ -2,13 +2,13 @@
   DemoApp.ino - Demo application for Xkit with Arduino board
   Created by Thomas Ho, Thinxtra Solution Pty.
   Febuary 14, 2017.
-  
+
   Using Adafruit_BMP280_Library and Adafruit_MMA8451_Library
   Copyright (c) 2012, Adafruit Industries
   Modified by Thomas Ho
 
-  Using SimpleTimer library (Andrew Mascolo (HazardsMind))  
-  
+  Using SimpleTimer library (Andrew Mascolo (HazardsMind))
+
   Released into the public domain.
 */
 
@@ -51,13 +51,16 @@ void setup() {
   Isigfox->testComms();
   delay(500); while (Serial.available()){ Serial.read(); delay(10);}
   GetDeviceID();
- 
+  delay(500); while (Serial.available()){ Serial.read(); delay(10);}
+  //Isigfox->setPublicKey(); // set public key for usage with SNEK
+  delay(500); while (Serial.available()){ Serial.read(); delay(10);}
+
   // Init sensors on Thinxtra Module
   tSensors->init();
   tSensors->setReed(reedIR);
-  tSensors->setButton(buttonIR); 
+  tSensors->setButton(buttonIR);
 
-  // Init timer to send a SIgfox message every 10 minutes
+  // Init timer to send a Sigfox message every 10 minutes
   unsigned long sendInterval = 600000;
   timer.setInterval(sendInterval, timeIR);
 }
@@ -74,7 +77,7 @@ void Send_Sensors(){
   char sendstr[2];
   acceleration_xyz xyz_g;
   FLOATUNION_t a_g;
-      
+
   Serial.available();
   delay(20);
   Serial.available();
@@ -111,7 +114,7 @@ void Send_Sensors(){
   buf_str[9] = y_g.bytes[1];
   buf_str[10] = z_g.bytes[0];
   buf_str[11] = z_g.bytes[1];
-  
+
   char* hex_str = tSensors->Byte2Hex(buf_str, payloadSize);
 
   sendlength = 2*payloadSize + 1;
@@ -131,13 +134,14 @@ void buttonIR(){
 
 void timeIR(){
   Serial.println("Time");
+  Isigfox->resetMacroChannel(); // required to send on first macro channel
   Send_Sensors();
 }
 
 
 void Send_Pload(char *sendData, int len){
   recvMsg RecvMsg;
-    
+
   while (Serial.available()){ Serial.read();}
   RecvMsg = Isigfox->sendPayload(sendData, len);
   for (int i=0; i<RecvMsg.len; i++){
@@ -152,7 +156,7 @@ void GetDeviceID(){
   recvMsg RecvMsg;
   char msg[] = "AT$I=10";
   int msgLen = 7;
-  
+
   while (Serial.available()){ Serial.read();}
   RecvMsg = Isigfox->sendMessage(msg, msgLen);
 

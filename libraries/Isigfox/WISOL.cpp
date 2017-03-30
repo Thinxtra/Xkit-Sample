@@ -11,7 +11,7 @@
 
 // Assign IO for WISOL - Not needed since WISOL share TX, RX with Ardruino
 void WISOL::configIO(pinIO pin){
-	
+
 }
 
 
@@ -22,11 +22,11 @@ int init()
 */
 int WISOL::init(){
 	recvMsg RecvMsg;
-	
+
 	// Init Serial
 	Serial.begin(9600);
 	currentZone = getZone();
-	
+
 	switch (currentZone){
 		case RCZ1:
 		{
@@ -53,10 +53,38 @@ int WISOL::init(){
 	return 0;
 }
 
+int WISOL::setPublicKey() {
+	recvMsg RecvMsg;
+	RecvMsg = sendMessage("ATS410=1", 8);
+	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
+		return 0;
+	}
+	return 1;
+}
+
+int WISOL::setPrivateKey() {
+	recvMsg RecvMsg;
+	RecvMsg = sendMessage("ATS410=0", 8);
+	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
+		return 0;
+	}
+	return 1;
+}
+
+int WISOL::resetMacroChannel() {
+	recvMsg RecvMsg;
+	RecvMsg = sendMessage("AT$RC", 5);
+	/*if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
+		return 0;
+	}
+	return 1;*/
+	return 0;
+}
+
 int WISOL::getZone(){
 	recvMsg RecvMsg;
 	RecvMsg = sendMessage("AT$I=7", 6);
-		
+
 	if (strCmp(RecvMsg.inData, "FCC", 3)){
 		RecvMsg = sendMessage("AT$DR?", 6);
 		if (strCmp(RecvMsg.inData, "905200000", 9)){
@@ -105,17 +133,17 @@ int testComms()
 int WISOL::testComms(){
 	static char testchar[] = "AT";
 	recvMsg RecvMsg;
-	
+
 	Buffer_Init(); // Prepare buffer
 	RecvMsg = sendMessage(testchar, 2); // Send message
-		
+
 	// Read ACK
 	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
 		return 0;
 	} else {
 		return 1;
 	}
-	
+
 	clearBuffer();
 }
 
@@ -132,7 +160,7 @@ recvMsg WISOL::sendPayload(char *inData, int len){
 	int headerLen = 6;
 	int bytelen = len/2;
 	recvMsg RecvMsg;
-	
+
 	if (bytelen<=12){
 		clearBuffer();
 		prepareZone();
@@ -140,12 +168,12 @@ recvMsg WISOL::sendPayload(char *inData, int len){
 		for (int i=0; i<headerLen; i++){
 			Serial.print(header[i]); // print header first
 		}
-		
+
 		for (int i=0; i<len; i++){
 			Serial.print(inData[i]); // print payload
 		}
 		Serial.println('\0'); // send end terminal
-		
+
 		RecvMsg = getRecvMsg(); // Read ACK
 	} else if ( (len%2) == 1 ){
 		Serial.println("Must send bytes.");
@@ -163,19 +191,19 @@ recvMsg sendMessage(char *inData, int len){
 */
 recvMsg WISOL::sendMessage(char *inData, int len){
 	recvMsg RecvMsg;
-	
+
 	clearBuffer();
 	Buffer_Init(); // prepare buffer
 	for (int i=0; i<len; i++){
 		Serial.print(inData[i]); // send message
 	}
 	Serial.println('\0'); // send end terminal
-	
+
 	RecvMsg = getRecvMsg(); // read ack or return payload
 	return RecvMsg;
 }
 
-/*  
+/*
 recvMsg prepareZone()
 	- Set the zone to ZC
 */
@@ -221,13 +249,13 @@ recvMsg getRecvMsg()
 recvMsg WISOL::getRecvMsg(){
 	recvMsg RecvMsg;
 	int count = 1;
-	
+
 	// Wait for the incomming message
 	while (Serial.available()==0 && count <= 10) {
 		count++;
 		delay(100);
 	}
-	
+
 	// Prepare receive messge format
 	RecvMsg.len = Serial.available();
 	RecvMsg.inData = master_receive;
@@ -236,10 +264,10 @@ recvMsg WISOL::getRecvMsg(){
 			RecvMsg.inData[i] = Serial.read(); // Read receive message
 		}
 	}
-	
+
 	clearBuffer();
-	
-	return RecvMsg;	
+
+	return RecvMsg;
 }
 
 /* Not used */

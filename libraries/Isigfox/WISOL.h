@@ -20,13 +20,16 @@ class WISOL : public Isigfox
 public:
 	WISOL(){}
     ~WISOL(){}
-    int init();  
+    int init();
     void configIO(pinIO pin);
 	int testComms();
 	recvMsg sendPayload(char *outData, int len);
 	recvMsg sendMessage(char *outData, int len);
 	int getZone();
 	int setZone();
+	int setPublicKey();
+	int setPrivateKey();
+	int resetMacroChannel();
 private:
 	void Buffer_Init();
 	recvMsg getRecvMsg();
@@ -36,9 +39,9 @@ private:
 	int strCmp(char *in1, char *in2, int len);
 	void printRecv(char* in, int len);
 	void clearBuffer();
-	
+
 	static const int BUFFER_SIZE = 0x18;
-	
+
 	char master_send[BUFFER_SIZE]    = {0};
 	char master_receive[BUFFER_SIZE] = {0};
 
