@@ -6,7 +6,6 @@
   Using Adafruit_BMP280_Library and Adafruit_MMA8451_Library
   Copyright (c) 2012, Adafruit Industries
   Modified by Thomas Ho
-
   Using SimpleTimer library (Andrew Mascolo (HazardsMind))  
   
   Released into the public domain.
@@ -30,12 +29,12 @@ typedef union{
 
 typedef union{
     uint16_t number;
-    uint8_t bytes[4];
+    uint8_t bytes[2];
 } UINT16_t;
 
 typedef union{
     int16_t number;
-    uint8_t bytes[4];
+    uint8_t bytes[2];
 } INT16_t;
 
 void setup() {
@@ -43,17 +42,14 @@ void setup() {
   Wire.setClock(100000);
 
   Serial.begin(9600);
-  Serial.println("Start...");
 
   // WISOL test
-  Isigfox->init();
-  delay(500); while (Serial.available()){ Serial.read(); delay(10);}
+  Isigfox->initSigfox();
   Isigfox->testComms();
-  delay(500); while (Serial.available()){ Serial.read(); delay(10);}
   GetDeviceID();
  
   // Init sensors on Thinxtra Module
-  tSensors->init();
+  tSensors->initSensors();
   tSensors->setReed(reedIR);
   tSensors->setButton(buttonIR); 
 
@@ -72,12 +68,8 @@ void Send_Sensors(){
   char sendMsg[20];
   int sendlength;
   char sendstr[2];
-  acceleration_xyz xyz_g;
+  acceleration_xyz *xyz_g;
   FLOATUNION_t a_g;
-      
-  Serial.available();
-  delay(20);
-  Serial.available();
 
   // Sending a float requires at least 4 bytes
   // In this demo, the measure values (temperature, pressure, sensor) are scaled to ranged from 0-65535.
@@ -88,19 +80,23 @@ void Send_Sensors(){
   Serial.print("Pressure: "); Serial.println((float)pressure.number*3);
   photo.number = (uint16_t) (tSensors->getPhoto() * 1000);
   Serial.print("Photo: "); Serial.println((float)photo.number/1000);
-  xyz_g = tSensors->getAccXYZ();
-  x_g.number = (int16_t) (xyz_g.x_g * 250);
-  y_g.number = (int16_t) (xyz_g.y_g * 250);
-  z_g.number = (int16_t) (xyz_g.z_g * 250);
+
+  xyz_g = (acceleration_xyz *)malloc(sizeof(acceleration_xyz));
+  tSensors->getAccXYZ(xyz_g);
+  x_g.number = (int16_t) (xyz_g->x_g * 250);
+  y_g.number = (int16_t) (xyz_g->y_g * 250);
+  z_g.number = (int16_t) (xyz_g->z_g * 250);
   Serial.print("Acc X: "); Serial.println((float)x_g.number/250);
   Serial.print("Acc Y: "); Serial.println((float)y_g.number/250);
   Serial.print("Acc Z: "); Serial.println((float)z_g.number/250);
-  delay(100); while (Serial.available()){ Serial.read(); delay(10);}
-
+  free(xyz_g);
+  
   int payloadSize = 12; //in byte
-  byte* buf_str = (byte*) malloc (2*payloadSize + 1);
+//  byte* buf_str = (byte*) malloc (payloadSize);
+  uint8_t buf_str[payloadSize];
+  
   buf_str[0] = tempt.bytes[0];
-  buf_str[1] = tempt.bytes[1];
+  buf_str[1] = tempt.bytes[1];  
   buf_str[2] = pressure.bytes[0];
   buf_str[3] = pressure.bytes[1];
   buf_str[4] = photo.bytes[0];
@@ -112,21 +108,18 @@ void Send_Sensors(){
   buf_str[10] = z_g.bytes[0];
   buf_str[11] = z_g.bytes[1];
   
-  char* hex_str = tSensors->Byte2Hex(buf_str, payloadSize);
-
-  sendlength = 2*payloadSize + 1;
-  Send_Pload(hex_str, sendlength);
-  delay(500); while (Serial.available()){ Serial.read(); delay(10);}
+  Send_Pload(buf_str, payloadSize);
+//  free(buf_str);
 }
 
 void reedIR(){
   Serial.println("Reed");
-  timer.setTimeout(200, Send_Sensors); // send a Sigfox message after get ou IRS
+  timer.setTimeout(20, Send_Sensors); // send a Sigfox message after get ou IRS
 }
 
 void buttonIR(){
   Serial.println("Button");
-  timer.setTimeout(200, Send_Sensors); // send a Sigfox message after get ou IRS
+  timer.setTimeout(20, Send_Sensors); // send a Sigfox message after get ou IRS
 }
 
 void timeIR(){
@@ -134,31 +127,67 @@ void timeIR(){
   Send_Sensors();
 }
 
-
-void Send_Pload(char *sendData, int len){
-  recvMsg RecvMsg;
-    
-  while (Serial.available()){ Serial.read();}
-  RecvMsg = Isigfox->sendPayload(sendData, len);
-  for (int i=0; i<RecvMsg.len; i++){
-    Serial.print(RecvMsg.inData[i]);
+void getDLMsg(){
+  recvMsg *RecvMsg;
+  int result;
+  
+  RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
+  result = Isigfox->getdownlinkMsg(RecvMsg);
+  for (int i=0; i<RecvMsg->len; i++){
+    Serial.print(RecvMsg->inData[i]);
   }
   Serial.println("");
+  free(RecvMsg);
+}
+
+
+void Send_Pload(uint8_t *sendData, int len){
+  // No downlink message require
+  recvMsg *RecvMsg;
+  
+  RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
+  Isigfox->sendPayload(sendData, len, 0, RecvMsg);
+  for (int i=0; i<RecvMsg->len; i++){
+    Serial.print(RecvMsg->inData[i]);
+  }
+  Serial.println("");
+  free(RecvMsg);
+
+  
+  // If want to get blocking downlink message, use the folling block instead
+  /*
+  recvMsg *RecvMsg;
+  
+  RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
+  Isigfox->sendPayload(sendData, len, 1, RecvMsg);
+  for (int i=0; i<RecvMsg->len; i++){
+    Serial.print(RecvMsg->inData[i]);
+  }
+  Serial.println("");
+  free(RecvMsg);
+  */
+
+  // If want to get non-blocking downlink message, use the folling block instead
+  /*
+  Isigfox->sendPayload(sendData, len, 1);
+  timer.setTimeout(46000, getDLMsg);
+  */
 }
 
 
 void GetDeviceID(){
   int headerLen = 6;
-  recvMsg RecvMsg;
+  recvMsg *RecvMsg;
   char msg[] = "AT$I=10";
   int msgLen = 7;
   
-  while (Serial.available()){ Serial.read();}
-  RecvMsg = Isigfox->sendMessage(msg, msgLen);
+  RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
+  Isigfox->sendMessage(msg, msgLen, RecvMsg);
 
   Serial.print("Device ID: ");
-  for (int i=0; i<RecvMsg.len; i++){
-    Serial.print(RecvMsg.inData[i]);
+  for (int i=0; i<RecvMsg->len; i++){
+    Serial.print(RecvMsg->inData[i]);
   }
   Serial.println("");
+  free(RecvMsg);
 }
