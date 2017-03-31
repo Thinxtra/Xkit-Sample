@@ -34,7 +34,7 @@ int init()
 	- Output: return 0 if init succesfully. Return 1 if otherwise.
 	- Purpose: Init Serial and set UL Frequency to 920.8 MHz
 */
-int Tsensors::init(){
+int Tsensors::initSensors(){
 	// Config IO
 	configIO();
 
@@ -67,6 +67,7 @@ int Tsensors::init(){
 	// Activate at max rate, low noise mode
 	write8(MMA8451_REG_CTRL_REG1, 0x01 | 0x04, accelerometerAddr);
 
+	return 0;
 }
 
 int Tsensors::getACK(uint8_t addr){
@@ -74,10 +75,12 @@ int Tsensors::getACK(uint8_t addr){
   return Wire.endTransmission();
 }
 
-acceleration_xyz Tsensors::getAccXYZ(){
-	int reading;
-	acceleration_xyz _acceleration_xyz;
+int Tsensors::getAccXYZ(acceleration_xyz *acc){
 	uint8_t range;
+	
+	if (acc==NULL){
+		return -1;
+	}
 	
 	int ack = getACK(accelerometerAddr);
 	if (ack==0){
@@ -101,26 +104,64 @@ acceleration_xyz Tsensors::getAccXYZ(){
 		if (range == MMA8451_RANGE_4_G) divider = 2048;
 		if (range == MMA8451_RANGE_2_G) divider = 4096;
 		
-		_acceleration_xyz.x_g = (float)x / divider;
-		_acceleration_xyz.y_g = (float)y / divider;
-		_acceleration_xyz.z_g = (float)z / divider;
+		acc->x_g = (float)x / divider;
+		acc->y_g = (float)y / divider;
+		acc->z_g = (float)z / divider;
+	} else {
+		return -1;
 	}
-	return _acceleration_xyz;
+	return 0;
 }
 
 float Tsensors::getAccX(){
-	acceleration_xyz _acceleration_xyz = getAccXYZ();
-	return _acceleration_xyz.x_g;
+	acceleration_xyz *xyz_g;
+	int flag;
+	float value;
+	
+	xyz_g = (acceleration_xyz *)malloc(sizeof(acceleration_xyz));
+	flag = getAccXYZ(xyz_g);
+	
+	if (flag==0){
+		value = xyz_g->x_g;
+		free(xyz_g);
+		return value;
+	} else {
+		return 0;
+	}
 }
 
 float Tsensors::getAccY(){
-	acceleration_xyz _acceleration_xyz = getAccXYZ();
-	return _acceleration_xyz.y_g;
+	acceleration_xyz *xyz_g;
+	int flag;
+	float value;
+	
+	xyz_g = (acceleration_xyz *)malloc(sizeof(acceleration_xyz));
+	flag = getAccXYZ(xyz_g);
+	
+	if (flag==0){
+		value = xyz_g->y_g;
+		free(xyz_g);
+		return value;
+	} else {
+		return 0;
+	}
 }
 
 float Tsensors::getAccZ(){
-	acceleration_xyz _acceleration_xyz = getAccXYZ();
-	return _acceleration_xyz.z_g;
+	acceleration_xyz *xyz_g;
+	int flag;
+	float value;
+	
+	xyz_g = (acceleration_xyz *)malloc(sizeof(acceleration_xyz));
+	flag = getAccXYZ(xyz_g);
+	
+	if (flag==0){
+		value = xyz_g->z_g;
+		free(xyz_g);
+		return value;
+	} else {
+		return 0;
+	}
 }
 
 float Tsensors::getTemp(){
@@ -344,21 +385,4 @@ uint8_t Tsensors::read8(uint8_t reg, uint8_t addr) {
     Wire.requestFrom(addr, 1);
     if (! Wire.available()) return -1;
     return (Wire.read());
-}
-
-
-char* Tsensors::Byte2Hex(unsigned char* input, int length){	
-	unsigned char *buf = input;
-    int i;
-    int size = length;
-    char* buf_str = (char*) malloc (2*size + 1);
-    char* buf_ptr = buf_str;
-    for (i = 0; i < size; i++)
-    {
-        buf_ptr += sprintf(buf_ptr, "%02X", buf[i]);
-    }
-    sprintf(buf_ptr,"\n");
-    *(buf_ptr + 1) = '\0';
-	
-	return buf_str;
 }
