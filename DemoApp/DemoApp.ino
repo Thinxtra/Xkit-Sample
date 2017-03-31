@@ -1,5 +1,6 @@
 /*
   DemoApp.ino - Demo application for Xkit with Arduino board
+  Version 1.0
   Created by Thomas Ho, Thinxtra Solution Pty.
   Febuary 14, 2017.
   
