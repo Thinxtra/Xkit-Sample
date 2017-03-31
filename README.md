@@ -15,7 +15,7 @@ The libraries should be copied to the location of Arduino libraries on your comp
 
 ## API Reference
 
-The development guide with Xkit using the libraries in this project is given at ....
+The development guide with Xkit using the libraries in this project is given in the Xkit Development Guide at http://www.thinxtra.com/xkit/
 
 ## License
 
