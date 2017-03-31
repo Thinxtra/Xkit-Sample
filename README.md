@@ -21,7 +21,7 @@ The development guide with Xkit using the libraries in this project is given at 
 
 The libraries is mainly contributed by Thomas Ho of Thinxtra Solution Pty.
 
-This project has used the Adafruit_MMA8451_Library and Adafruit_BMP280_Library 
-Copyright (c) 2012, Adafruit Industries
+This project has used the Adafruit_MMA8451_Library and Adafruit_BMP280_Library.
+Copyright (c) 2012, Adafruit Industries.
 
-This project also used the SimpleTimer library of Andrew Mascolo (HazardsMind) 
+This project also used the SimpleTimer library of Andrew Mascolo (HazardsMind).
