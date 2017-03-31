@@ -50,7 +50,7 @@ public:
 	@return			0 if successful, -1 if failed
 	TODO	change to 1 -> -1
     */
-    virtual int init()=0;
+    virtual int initSigfox()=0;
 	
 	
     /** Set IO pin for Sigfox Communication 
@@ -67,22 +67,30 @@ public:
 
 	
     /** Send a Sigfox frame 
-    	@param outData		a pointer to an array of bytes to send
-    	@param len		[0...12], the length of the array of bytes to send 
-	@return			a recvMsg structure that contains the length and a pointer 
-				to the array of received bytes from Sigfox module
+    	@param outData					a pointer to an array of bytes to send
+    	@param len						[0...12], the length of the array of bytes to send 
+		@param donwlink					0, no downlink message required or 1, downlink message required. Other valid are invalid.
+		@param recvMsg *receivedMsg		pointer on recMsg structure. if NULL or not used, the function will not block until Sigfox module’s answer reception. 
+		@return							0 if succeed and -1, otherwise
     */
-    virtual recvMsg sendPayload(char *outData, int len) = 0;
+	virtual int sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg) = 0;
+	virtual int sendPayload(uint8_t *outData, int len, int downlink) = 0;
 
 	
     /** Send a command to the Sigfox module
-    	@param pin		a pointer to an array of bytes to send
-    	@param len		the length of the array of bytes to send
-    	@return			a recvMsg structure that contains the length and a pointer 
-				to the array of received bytes from Sigfox module
+    	@param outData					a pointer to an array of characters to send
+    	@param len						the length of the array of characters to send 
+		@param recvMsg *receivedMsg		pointer on recMsg structure.
+		@return							0 if succeed and -1, otherwise
     */
-    virtual recvMsg sendMessage(char *outData, int len) = 0;
+    virtual int sendMessage(char *outData, int len, recvMsg *receivedMsg) = 0;
 
+	
+	/** Get Sigfox downlink message
+		@param recvMsg *receivedMsg		pointer on recMsg structure.
+		@return							0 if succeed and -1, otherwise
+    */
+	virtual int getdownlinkMsg(recvMsg *receivedMsg) = 0;
 	
     /** Get the zone of the current Sigfox module
 	@return			1 if RCZ1, 2 if RCZ2, 3 if RCZ3, or 4 if RCZ4
