@@ -260,7 +260,6 @@ int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *
 	} else {
 		return 0; // No wait for ack
 	}
-	
 	return receivedResult;
 }
 
@@ -362,7 +361,7 @@ int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 	if (downlink == 1){
 		countMax = 460; // wait 45s + 1 extra second
 	} else {
-		countMax = 10; // wait 1 second
+		countMax = 100; // wait 10 second
 	}
 	
 	// Wait for the incomming message
@@ -371,8 +370,8 @@ int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 		delay(100);
 	}
 	
-	receivedResult = getdownlinkMsg(downlink, receivedMsg);
-	
+	receivedResult = getdownlinkMsg(receivedMsg);
+
 	return receivedResult;
 }
 
@@ -386,58 +385,26 @@ int WISOL::getdownlinkMsg(recvMsg *receivedMsg){ // public - downlink = 1 always
 		for (int i=0; i<receivedMsg->len; i++){
 			master_receive[i] = Serial.read(); // Read receive message
 		}
-	}
-	clearBuffer();
-	
-	if (strCmp(receivedMsg->inData, "OK", 2)==1){
-		receivedMsg->inData = receivedMsg->inData + 3;
-		receivedMsg->len = receivedMsg->len - 3;
+		
+		if (strCmp(receivedMsg->inData, "OK", 2)==1){
+			
+		} else {
+			return -1;
+		}
+		
+
+		if (strCmp(receivedMsg->inData, "Er", 2)){
+			return -1;
+		} else {
+			return 0;
+		}
+		
 	} else {
 		return -1;
 	}
-	
-	if (receivedMsg->len!=0){
-		if (strCmp(receivedMsg->inData, "Error", 5)){
-			return -1;
-		} else {
-			return 0;
-		}
-	} else{
-		return -1;
-	}
-}
-
-
-int WISOL::getdownlinkMsg(int downlink, recvMsg *receivedMsg){ // private
-	
-	// Prepare receive messge format
-	receivedMsg->len = Serial.available();
-	receivedMsg->inData = master_receive;
-	if (receivedMsg->len){
-		for (int i=0; i<receivedMsg->len; i++){
-			master_receive[i] = Serial.read(); // Read receive message
-		}
-	}
 	clearBuffer();
 	
-	if (downlink==1){
-		if (strCmp(receivedMsg->inData, "OK", 2)==1){
-			receivedMsg->inData = receivedMsg->inData + 3;
-			receivedMsg->len = receivedMsg->len - 3;
-		} else {
-			return -1;
-		}
-	}
 	
-	if (receivedMsg->len!=0){
-		if (strCmp(receivedMsg->inData, "Error", 5)){
-			return -1;
-		} else {
-			return 0;
-		}
-	} else{
-		return -1;
-	}
 }
 
 
