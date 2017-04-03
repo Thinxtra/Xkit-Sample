@@ -54,30 +54,44 @@ int WISOL::initSigfox(){
 }
 
 int WISOL::setPublicKey() {
-	recvMsg RecvMsg;
-	RecvMsg = sendMessage("ATS410=1", 8);
-	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
-		return 0;
+	recvMsg *receivedMsg;
+	int receivedResult;
+
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage("ATS410=1", 8, receivedMsg);
+	if (receivedResult == -1){
+		Serial.println("Cannot set public key.");
+		clearBuffer();
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int WISOL::setPrivateKey() {
-	recvMsg RecvMsg;
-	RecvMsg = sendMessage("ATS410=0", 8);
-	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
-		return 0;
+	recvMsg *receivedMsg;
+	int receivedResult;
+
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage("ATS410=0", 8, receivedMsg);
+	if (receivedResult == -1){
+		Serial.println("Cannot set private key.");
+		clearBuffer();
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int WISOL::resetMacroChannel() {
-	recvMsg RecvMsg;
-	RecvMsg = sendMessage("AT$RC", 5);
-	/*if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
-		return 0;
+	recvMsg *receivedMsg;
+	int receivedResult;
+
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage("AT$RC", 5, receivedMsg);
+	if (receivedResult == -1){
+		Serial.println("Cannot reset Macro Channel.");
+		clearBuffer();
+		return 1;
 	}
-	return 1;*/
 	return 0;
 }
 
