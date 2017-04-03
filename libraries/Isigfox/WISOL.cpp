@@ -20,9 +20,8 @@ int init()
 	- Output: return 0 if init succesfully. Return 1 if otherwise.
 	- Purpose: Init Serial and set UL Frequency to 920.8 MHz
 */
-int WISOL::init(){
-	recvMsg RecvMsg;
 
+int WISOL::initSigfox(){
 	// Init Serial
 	Serial.begin(9600);
 	currentZone = getZone();
@@ -46,11 +45,12 @@ int WISOL::init(){
 		default:
 		{
 			Serial.println("No zone");
-			break;
+			clearBuffer();
+			return -1;
 		}
 	}
 	clearBuffer();
-	return 0;
+	return 1;
 }
 
 int WISOL::setPublicKey() {
@@ -82,19 +82,31 @@ int WISOL::resetMacroChannel() {
 }
 
 int WISOL::getZone(){
-	recvMsg RecvMsg;
-	RecvMsg = sendMessage("AT$I=7", 6);
+	recvMsg *receivedMsg;
+	int receivedResult;
 
-	if (strCmp(RecvMsg.inData, "FCC", 3)){
-		RecvMsg = sendMessage("AT$DR?", 6);
-		if (strCmp(RecvMsg.inData, "905200000", 9)){
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage("AT$I=7", 6, receivedMsg);
+
+	if (receivedResult == -1){
+		return 0;
+	}
+
+	if (strCmp(receivedMsg->inData, "FCC", 3)){
+		receivedResult = sendMessage("AT$DR?", 6, receivedMsg);
+
+		if (receivedResult == -1){
+			return 0;
+		}
+
+		if (strCmp(receivedMsg->inData, "905200000", 9)){
 			return RCZ2;
-		} else if (strCmp(RecvMsg.inData, "922300000", 9)) {
+		} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
 			return RCZ4;
 		} else {
 			return 0;
 		}
-	} else if (strCmp(RecvMsg.inData, "ETSI", 4)){
+	} else if (strCmp(receivedMsg->inData, "ETSI", 4)){
 		return RCZ1;
 	} else {
 		return 0;
@@ -132,18 +144,24 @@ int testComms()
 */
 int WISOL::testComms(){
 	static char testchar[] = "AT";
-	recvMsg RecvMsg;
+	recvMsg *receivedMsg;
+	int receivedResult;
 
 	Buffer_Init(); // Prepare buffer
-	RecvMsg = sendMessage(testchar, 2); // Send message
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage(testchar, 2, receivedMsg); // Send message
 
 	// Read ACK
-	if (RecvMsg.inData[0]=='O' && RecvMsg.inData[1]=='K'){
-		return 0;
-	} else {
-		return 1;
+	if (receivedResult == -1){
+		return -1;
 	}
 
+	if (receivedMsg->inData[0]=='O' && receivedMsg->inData[1]=='K'){
+		return 0;
+	} else {
+		return -1;
+	}
+	free(receivedMsg);
 	clearBuffer();
 }
 
@@ -152,36 +170,130 @@ recvMsg sendPayload(char *inData, int len){
 	- Input: inData is a pointer to the sending payload.
 	         len is the length (in bytes) of the sending payload.
 	- Output: recvMsg is received message
-
 Important note: inData is a string of hex (i.e., to send a byte of 0xAB, we need inData = {'A', 'B'})
 */
-recvMsg WISOL::sendPayload(char *inData, int len){
+int WISOL::sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg){
+	int receivedResult;
+
+	if ((len > 12) | (len<=0)){
+		Serial.println("Payload length must be positive and not be longer than 12 bytes.");
+		clearBuffer();
+		return -1;
+	}
+
+	if (outData==NULL){
+		Serial.println("outData is NULL.");
+		clearBuffer();
+		return -1;
+	}
+
+	if ((downlink != 0) & (downlink != 1)){
+		Serial.println("downlink must be 0 or 1.");
+		clearBuffer();
+		return -1;
+	}
+
+	if (receivedMsg==NULL){
+		Serial.println("receivedMsg is NULL.");
+		clearBuffer();
+		return -1;
+	}
+
+	receivedResult = sendPayloadProcess(outData, len, downlink, receivedMsg);
+
+	return receivedResult;
+}
+
+
+/*
+recvMsg sendPayload(char *inData, int len){
+	- Input: inData is a pointer to the sending payload.
+	         len is the length (in bytes) of the sending payload.
+	- Output: recvMsg is received message
+Important note: inData is a string of hex (i.e., to send a byte of 0xAB, we need inData = {'A', 'B'})
+*/
+int WISOL::sendPayload(uint8_t *outData, int len, int downlink){
+	int receivedResult;
+
+	if ((len > 12) | (len<=0)){
+		Serial.println("Payload length must be positive and not be longer than 12 bytes.");
+		clearBuffer();
+		return -1;
+	}
+
+	if (outData==NULL){
+		Serial.println("outData is NULL.");
+		clearBuffer();
+		return -1;
+	}
+
+	if ((downlink != 0) & (downlink != 1)){
+		Serial.println("downlink must be 0 or 1.");
+		clearBuffer();
+		return -1;
+	}
+
+	receivedResult = sendPayloadProcess(outData, len, downlink, NULL);
+
+	return receivedResult;
+}
+
+
+
+int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg){
 	static char header[] = "AT$SF=";
 	int headerLen = 6;
-	int bytelen = len/2;
-	recvMsg RecvMsg;
+	int actualLen;
+	int sendLen;
+	char* hex_str;
+	int receivedResult;
 
-	if (bytelen<=12){
-		clearBuffer();
-		prepareZone();
-		Buffer_Init();
-		for (int i=0; i<headerLen; i++){
-			Serial.print(header[i]); // print header first
-		}
-
-		for (int i=0; i<len; i++){
-			Serial.print(inData[i]); // print payload
-		}
-		Serial.println('\0'); // send end terminal
-
-		RecvMsg = getRecvMsg(); // Read ACK
-	} else if ( (len%2) == 1 ){
-		Serial.println("Must send bytes.");
+	if ((outData[len]=='\0') | (outData[len]=='\n')){
+		actualLen = len - 1;
 	} else {
-		Serial.println("Payload length must not be longer than 12 bytes.");
+		actualLen = len;
 	}
-	return RecvMsg;
+
+	hex_str = (char*) malloc (2*actualLen);
+	ASCII2Hex(outData, actualLen, hex_str);
+	sendLen = 2*actualLen;
+
+	clearBuffer();
+	receivedResult = prepareZone();
+
+	if (receivedResult == -1){
+		Serial.println("Prepare zone failed");
+		clearBuffer();
+		return -1;
+	}
+
+	Buffer_Init();
+	for (int i=0; i<headerLen; i++){
+		Serial.print(header[i]); // print header first
+	}
+
+	for (int i=0; i<sendLen; i++){
+		Serial.print(hex_str[i]); // print payload
+	}
+
+	if (downlink==1){
+		Serial.print(",1");
+	} else {
+
+	}
+
+	Serial.println('\n'); // send end terminal
+	free(hex_str); // free hex_str from the memory
+
+	if (receivedMsg!=NULL){
+		receivedResult = getRecvMsg(receivedMsg, downlink); // Read ACK
+	} else {
+		return 0; // No wait for ack
+	}
+	return receivedResult;
 }
+
+
 
 /*
 recvMsg sendMessage(char *inData, int len){
@@ -189,30 +301,53 @@ recvMsg sendMessage(char *inData, int len){
 	         len is the length of the sending message.
 	- Output: recvMsg is received message
 */
-recvMsg WISOL::sendMessage(char *inData, int len){
-	recvMsg RecvMsg;
+int WISOL::sendMessage(char *outData, int len, recvMsg *receivedMsg){
+	int receivedResult;
+
+	if (len<=0){
+		Serial.println("Payload length must be positive.");
+		clearBuffer();
+		return -1;
+	}
+
+	if (outData==NULL){
+		Serial.println("outData is NULL.");
+		clearBuffer();
+		return -1;
+	}
+
+	if (receivedMsg==NULL){
+		Serial.println("receivedMsg is NULL.");
+		clearBuffer();
+		return -1;
+	}
 
 	clearBuffer();
 	Buffer_Init(); // prepare buffer
 	for (int i=0; i<len; i++){
-		Serial.print(inData[i]); // send message
+		Serial.print(outData[i]); // send message
 	}
 	Serial.println('\0'); // send end terminal
 
-	RecvMsg = getRecvMsg(); // read ack or return payload
-	return RecvMsg;
+	receivedResult = getRecvMsg(receivedMsg, 0); // read ack or return payload
+
+	return receivedResult;
 }
 
 /*
 recvMsg prepareZone()
 	- Set the zone to ZC
 */
-recvMsg WISOL::prepareZone(){
+int WISOL::prepareZone(){
+	recvMsg *receivedMsg;
+	int receivedResult;
+
+	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
 	switch (currentZone){
 		case RCZ1:
 		{
 			char testchar[] = "AT302=15";
-			return sendMessage(testchar, 8);
+			receivedResult = sendMessage(testchar, 8, receivedMsg);
 			break;
 		}
 		case RCZ2:
@@ -222,21 +357,23 @@ recvMsg WISOL::prepareZone(){
 		case RCZ4:
 		{
 			char testchar[] = "AT$RC";
-			return sendMessage(testchar, 5);
+			receivedResult = sendMessage(testchar, 5, receivedMsg);
 			break;
 		}
 		default:
 		{
+			receivedResult = -1;
 			break;
 		}
 	}
+	free(receivedMsg);
+	return receivedResult;
 }
 
 // prepare buffer
 void WISOL::Buffer_Init()
 {
   for (int i = 0; i < BUFFER_SIZE; i++) {
-    master_send[i] = 0xFF;
     master_receive[i] = 0xFF;
   }
 }
@@ -246,29 +383,68 @@ void WISOL::Buffer_Init()
 recvMsg getRecvMsg()
 	- Output: return receive message from WISOL
 */
-recvMsg WISOL::getRecvMsg(){
-	recvMsg RecvMsg;
+int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 	int count = 1;
+	int countMax;
+	int receivedResult;
+
+	if (downlink == 1){
+		countMax = 460; // wait 45s + 1 extra second
+	} else {
+		countMax = 100; // wait 10 second
+	}
 
 	// Wait for the incomming message
-	while (Serial.available()==0 && count <= 10) {
+	while (Serial.available()==0 && count <= countMax) {
 		count++;
 		delay(100);
 	}
 
-	// Prepare receive messge format
-	RecvMsg.len = Serial.available();
-	RecvMsg.inData = master_receive;
-	if (RecvMsg.len){
-		for (int i=0; i<RecvMsg.len; i++){
-			RecvMsg.inData[i] = Serial.read(); // Read receive message
-		}
-	}
+	receivedResult = getdownlinkMsg(receivedMsg);
 
+	return receivedResult;
+}
+
+
+int WISOL::getdownlinkMsg(recvMsg *receivedMsg){
+
+	// Prepare receive messge format
+	receivedMsg->len = Serial.available();
+	receivedMsg->inData = master_receive;
+	if (receivedMsg->len){
+		for (int i=0; i<receivedMsg->len; i++){
+			master_receive[i] = Serial.read(); // Read receive message
+		}
+
+		if (strCmp(receivedMsg->inData, "OK", 2)==1){
+			return 0;
+		} else {
+
+		}
+
+		if (strCmp(receivedMsg->inData, "Er", 2)){
+			return -1;
+		} else {
+			return 0;
+		}
+
+	} else {
+		return -1;
+	}
 	clearBuffer();
 
-	return RecvMsg;
+
 }
+
+
+void WISOL::ASCII2Hex(uint8_t* input, int length, char* buf_str){
+    for (int i = 0; i < length; i++)
+    {
+        buf_str += sprintf(buf_str, "%02X", input[i]);
+    }
+    sprintf(buf_str,"\n");
+}
+
 
 /* Not used */
 recvMsg WISOL::goDeepSleep(){

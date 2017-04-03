@@ -20,11 +20,13 @@ class WISOL : public Isigfox
 public:
 	WISOL(){}
     ~WISOL(){}
-    int init();
+    int initSigfox();
     void configIO(pinIO pin);
 	int testComms();
-	recvMsg sendPayload(char *outData, int len);
-	recvMsg sendMessage(char *outData, int len);
+	int sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
+	int sendPayload(uint8_t *outData, int len, int downlink);
+	int sendMessage(char *outData, int len, recvMsg *receivedMsg);
+	int getdownlinkMsg(recvMsg *receivedMsg);
 	int getZone();
 	int setZone();
 	int setPublicKey();
@@ -32,20 +34,24 @@ public:
 	int resetMacroChannel();
 private:
 	void Buffer_Init();
-	recvMsg getRecvMsg();
-	recvMsg prepareZone();
+	int getRecvMsg(recvMsg *receivedMsg, int downlink);
+	int prepareZone();
 	recvMsg goDeepSleep();
 	void wakeDeepSleep();
 	int strCmp(char *in1, char *in2, int len);
 	void printRecv(char* in, int len);
 	void clearBuffer();
+	void ASCII2Hex(uint8_t* input, int length, char* buf_str);
+	int sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
+	int getdownlinkMsg(int downlink, recvMsg *receivedMsg);
 
-	static const int BUFFER_SIZE = 0x18;
-
-	char master_send[BUFFER_SIZE]    = {0};
+	static const int BUFFER_SIZE = 40;
 	char master_receive[BUFFER_SIZE] = {0};
 
-	int currentZone = 0;
+	// char* master_receive;
+
+	int currentZone;
+
 	typedef enum{
 	   Exit=0,
 	   Send_Wakeup,             /*!< Wakes up OL2361 */

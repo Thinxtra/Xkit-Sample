@@ -21,7 +21,7 @@ sendPayload		KEYWORD2
 sendMessage		KEYWORD2
 getZone			KEYWORD2
 setZone			KEYWORD2
-
+getdownlinkMsg	KEYWORD2
 #######################################
 # Instances (KEYWORD2)
 #######################################
