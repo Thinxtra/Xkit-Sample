@@ -234,6 +234,7 @@ int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *
 	
 	if (receivedResult == -1){
 		Serial.println("Prepare zone failed");
+		clearBuffer();
 		return -1;
 	}
 	
@@ -376,7 +377,7 @@ int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 }
 
 
-int WISOL::getdownlinkMsg(recvMsg *receivedMsg){ // public - downlink = 1 always
+int WISOL::getdownlinkMsg(recvMsg *receivedMsg){
 	
 	// Prepare receive messge format
 	receivedMsg->len = Serial.available();
@@ -387,15 +388,14 @@ int WISOL::getdownlinkMsg(recvMsg *receivedMsg){ // public - downlink = 1 always
 		}
 		
 		if (strCmp(receivedMsg->inData, "OK", 2)==1){
-			
+			return 0;
 		} else {
-			return -1;
+			
 		}
 		
-
 		if (strCmp(receivedMsg->inData, "Er", 2)){
 			return -1;
-		} else {
+		} else {	
 			return 0;
 		}
 		
