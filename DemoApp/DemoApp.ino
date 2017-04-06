@@ -3,12 +3,12 @@
   Version 1.0
   Created by Thomas Ho, Thinxtra Solution Pty.
   Febuary 14, 2017.
-  
+
   Using Adafruit_BMP280_Library and Adafruit_MMA8451_Library
   Copyright (c) 2012, Adafruit Industries
   Modified by Thomas Ho
-  Using SimpleTimer library (Andrew Mascolo (HazardsMind))  
-  
+  Using SimpleTimer library (Andrew Mascolo (HazardsMind))
+
   Released into the public domain.
 */
 
@@ -48,11 +48,12 @@ void setup() {
   Isigfox->initSigfox();
   Isigfox->testComms();
   GetDeviceID();
- 
+  //Isigfox->setPublicKey(); // set public key for usage with SNEK
+
   // Init sensors on Thinxtra Module
   tSensors->initSensors();
   tSensors->setReed(reedIR);
-  tSensors->setButton(buttonIR); 
+  tSensors->setButton(buttonIR);
 
   // Init timer to send a SIgfox message every 10 minutes
   unsigned long sendInterval = 600000;
@@ -91,13 +92,13 @@ void Send_Sensors(){
   Serial.print("Acc Y: "); Serial.println((float)y_g.number/250);
   Serial.print("Acc Z: "); Serial.println((float)z_g.number/250);
   free(xyz_g);
-  
+
   int payloadSize = 12; //in byte
 //  byte* buf_str = (byte*) malloc (payloadSize);
   uint8_t buf_str[payloadSize];
-  
+
   buf_str[0] = tempt.bytes[0];
-  buf_str[1] = tempt.bytes[1];  
+  buf_str[1] = tempt.bytes[1];
   buf_str[2] = pressure.bytes[0];
   buf_str[3] = pressure.bytes[1];
   buf_str[4] = photo.bytes[0];
@@ -108,7 +109,7 @@ void Send_Sensors(){
   buf_str[9] = y_g.bytes[1];
   buf_str[10] = z_g.bytes[0];
   buf_str[11] = z_g.bytes[1];
-  
+
   Send_Pload(buf_str, payloadSize);
 //  free(buf_str);
 }
@@ -131,7 +132,7 @@ void timeIR(){
 void getDLMsg(){
   recvMsg *RecvMsg;
   int result;
-  
+
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   result = Isigfox->getdownlinkMsg(RecvMsg);
   for (int i=0; i<RecvMsg->len; i++){
@@ -145,7 +146,9 @@ void getDLMsg(){
 void Send_Pload(uint8_t *sendData, int len){
   // No downlink message require
   recvMsg *RecvMsg;
-  
+  Isigfox->resetMacroChannel(); // required to send on first macro channel
+  delay(100);
+
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   Isigfox->sendPayload(sendData, len, 0, RecvMsg);
   for (int i=0; i<RecvMsg->len; i++){
@@ -154,11 +157,11 @@ void Send_Pload(uint8_t *sendData, int len){
   Serial.println("");
   free(RecvMsg);
 
-  
+
   // If want to get blocking downlink message, use the folling block instead
   /*
   recvMsg *RecvMsg;
-  
+
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   Isigfox->sendPayload(sendData, len, 1, RecvMsg);
   for (int i=0; i<RecvMsg->len; i++){
@@ -181,7 +184,7 @@ void GetDeviceID(){
   recvMsg *RecvMsg;
   char msg[] = "AT$I=10";
   int msgLen = 7;
-  
+
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   Isigfox->sendMessage(msg, msgLen, RecvMsg);
 

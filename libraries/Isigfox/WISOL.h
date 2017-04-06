@@ -20,7 +20,7 @@ class WISOL : public Isigfox
 public:
 	WISOL(){}
     ~WISOL(){}
-    int initSigfox();  
+    int initSigfox();
     void configIO(pinIO pin);
 	int testComms();
 	int sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
@@ -29,6 +29,9 @@ public:
 	int getdownlinkMsg(recvMsg *receivedMsg);
 	int getZone();
 	int setZone();
+	int setPublicKey();
+	int setPrivateKey();
+	int resetMacroChannel();
 private:
 	void Buffer_Init();
 	int getRecvMsg(recvMsg *receivedMsg, int downlink);
@@ -41,14 +44,14 @@ private:
 	void ASCII2Hex(uint8_t* input, int length, char* buf_str);
 	int sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
 	int getdownlinkMsg(int downlink, recvMsg *receivedMsg);
-	
+
 	static const int BUFFER_SIZE = 40;
 	char master_receive[BUFFER_SIZE] = {0};
-	
+
 	// char* master_receive;
 
 	int currentZone;
-	
+
 	typedef enum{
 	   Exit=0,
 	   Send_Wakeup,             /*!< Wakes up OL2361 */
