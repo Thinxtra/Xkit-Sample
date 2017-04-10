@@ -23,8 +23,8 @@ public:
     int initSigfox();
     void configIO(pinIO pin);
 	int testComms();
-	int sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
-	int sendPayload(uint8_t *outData, int len, int downlink);
+	int sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
+	int sendPayload(uint8_t *outData, const uint8_t len, int downlink);
 	int sendMessage(char *outData, int len, recvMsg *receivedMsg);
 	int getdownlinkMsg(recvMsg *receivedMsg);
 	int getZone();
@@ -42,7 +42,7 @@ private:
 	void printRecv(char* in, int len);
 	void clearBuffer();
 	void ASCII2Hex(uint8_t* input, int length, char* buf_str);
-	int sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg);
+	int sendPayloadProcess(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
 	int getdownlinkMsg(int downlink, recvMsg *receivedMsg);
 
 	static const int BUFFER_SIZE = 40;

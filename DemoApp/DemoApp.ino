@@ -93,7 +93,7 @@ void Send_Sensors(){
   Serial.print("Acc Z: "); Serial.println((float)z_g.number/250);
   free(xyz_g);
 
-  int payloadSize = 12; //in byte
+  const uint8_t payloadSize = 12; //in bytes
 //  byte* buf_str = (byte*) malloc (payloadSize);
   uint8_t buf_str[payloadSize];
 
@@ -143,7 +143,7 @@ void getDLMsg(){
 }
 
 
-void Send_Pload(uint8_t *sendData, int len){
+void Send_Pload(uint8_t *sendData, const uint8_t len){
   // No downlink message require
   recvMsg *RecvMsg;
   Isigfox->resetMacroChannel(); // required to send on first macro channel
@@ -151,7 +151,7 @@ void Send_Pload(uint8_t *sendData, int len){
 
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   Isigfox->sendPayload(sendData, len, 0, RecvMsg);
-  for (int i=0; i<RecvMsg->len; i++){
+  for (int i = 0; i < RecvMsg->len; i++) {
     Serial.print(RecvMsg->inData[i]);
   }
   Serial.println("");

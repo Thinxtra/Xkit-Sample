@@ -71,12 +71,12 @@ public:
     /** Send a Sigfox frame
     	@param outData					a pointer to an array of bytes to send
     	@param len						[0...12], the length of the array of bytes to send
-		@param donwlink					0, no downlink message required or 1, downlink message required. Other valid are invalid.
+		@param donwlink					0, no downlink message required or 1, downlink message required. Other values are invalid.
 		@param recvMsg *receivedMsg		pointer on recMsg structure. if NULL or not used, the function will not block until Sigfox module’s answer reception.
 		@return							0 if succeed and -1, otherwise
     */
-	virtual int sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg) = 0;
-	virtual int sendPayload(uint8_t *outData, int len, int downlink) = 0;
+	virtual int sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg) = 0;
+	virtual int sendPayload(uint8_t *outData, const uint8_t len, int downlink) = 0;
 
 
     /** Send a command to the Sigfox module
@@ -107,17 +107,17 @@ public:
     */
     virtual int setZone() = 0;
 
-		/** Set the AES Key to public value in order to use SNEK dongle
+	/** Set the AES Key to public value in order to use SNEK dongle
 	@return			0
-		*/
-		virtual int setPublicKey() = 0;
+	*/
+	virtual int setPublicKey() = 0;
 
-		/** Set the AES Key to default private value to use on sigfox network
-	@return			0
+	/** Set the AES Key to default private value to use on sigfox network
+    @return			0
     */
     virtual int setPrivateKey() = 0;
 
-		/** Reset the FCC Macro Channel
+	/** Reset the FCC Macro Channel
 	@return			0
     */
     virtual int resetMacroChannel() = 0;
