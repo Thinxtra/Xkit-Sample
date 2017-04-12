@@ -200,7 +200,7 @@ int WISOL::sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMs
 		return -1;
 	}
 
-	if ((downlink != 0) || (downlink != 1)){
+	if (!((downlink == 0) || (downlink == 1))){
 		Serial.println("downlink must be 0 or 1.");
 		clearBuffer();
 		return -1;
@@ -240,7 +240,7 @@ int WISOL::sendPayload(uint8_t *outData, const uint8_t len, int downlink){
 		return -1;
 	}
 
-	if ((downlink != 0) || (downlink != 1)){
+	if (!((downlink == 0) || (downlink == 1))){
 		Serial.println("downlink must be 0 or 1.");
 		clearBuffer();
 		return -1;
