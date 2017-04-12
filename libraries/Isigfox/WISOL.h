@@ -25,7 +25,7 @@ public:
 	int testComms();
 	int sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
 	int sendPayload(uint8_t *outData, const uint8_t len, int downlink);
-	int sendMessage(char *outData, int len, recvMsg *receivedMsg);
+	int sendMessage(char *outData, const uint8_t len, recvMsg *receivedMsg);
 	int getdownlinkMsg(recvMsg *receivedMsg);
 	int getZone();
 	int setZone();

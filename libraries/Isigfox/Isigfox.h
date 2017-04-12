@@ -84,7 +84,7 @@ public:
 		@param recvMsg *receivedMsg		pointer on recMsg structure.
 		@return							0 if succeed and -1, otherwise
     */
-    virtual int sendMessage(char *outData, int len, recvMsg *receivedMsg) = 0;
+    virtual int sendMessage(char *outData, const uint8_t len, recvMsg *receivedMsg) = 0;
 
 
 
