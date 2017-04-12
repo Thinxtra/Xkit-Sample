@@ -13,7 +13,7 @@
 	@param len		the length of the array of received bytes
 */
 typedef struct _recvMsg{
-	int len=0;
+	int len;
 	char* inData;
 } recvMsg;
 
