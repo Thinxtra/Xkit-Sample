@@ -17,7 +17,7 @@ void WISOL::configIO(pinIO pin){
 
 /*
 int init()
-	- Output: return 0 if init succesfully. Return 1 otherwise.
+	- Output: return 0 if init succesfully. Return -1 otherwise.
 	- Purpose: Init Serial and set UL Frequency to 920.8 MHz
 */
 int WISOL::initSigfox(){
@@ -45,7 +45,7 @@ int WISOL::initSigfox(){
 		{
 			Serial.println("No zone");
 			clearBuffer();
-			return 1;
+			return -1;
 		}
 	}
 	clearBuffer();
