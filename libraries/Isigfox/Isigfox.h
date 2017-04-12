@@ -48,7 +48,6 @@ public:
 
     /** Prepare Sigfox communication
 	@return			0 if successful, -1 if failed
-	TODO	change to 1 -> -1
     */
 
     virtual int initSigfox()=0;
@@ -56,7 +55,6 @@ public:
 
     /** Set IO pin for Sigfox Communication
 	@param pin		a structure containing pin configuration
-	TODO	need to define pin as a structure
     */
     virtual void configIO(pinIO pin)=0;
 
