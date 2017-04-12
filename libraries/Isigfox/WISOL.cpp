@@ -17,10 +17,9 @@ void WISOL::configIO(pinIO pin){
 
 /*
 int init()
-	- Output: return 0 if init succesfully. Return 1 if otherwise.
+	- Output: return 0 if init succesfully. Return 1 otherwise.
 	- Purpose: Init Serial and set UL Frequency to 920.8 MHz
 */
-
 int WISOL::initSigfox(){
 	// Init Serial
 	Serial.begin(9600);
@@ -46,11 +45,11 @@ int WISOL::initSigfox(){
 		{
 			Serial.println("No zone");
 			clearBuffer();
-			return -1;
+			return 1;
 		}
 	}
 	clearBuffer();
-	return 1;
+	return 0;
 }
 
 int WISOL::setPublicKey() {
@@ -132,7 +131,7 @@ int WISOL::setZone(){
 	return -1;
 }
 
-void WISOL::printRecv(char *in, int len){
+void WISOL::printRecv(char *in, int len) {
 	for (int i=0; i<len; i++){
 		Serial.print(in[i]);
 	}
@@ -154,7 +153,7 @@ int WISOL::strCmp(char *in1, char *in2, int len){
 int testComms()
  - Send "AT" and wait for "OK" back
  - Return 0 if testing succesfully (receive "1234" back)
- - Return 1 otherwise
+ - Return -1 otherwise
 */
 int WISOL::testComms(){
 	static char testchar[] = "AT";
@@ -170,7 +169,7 @@ int WISOL::testComms(){
 		return -1;
 	}
 
-	if (receivedMsg->inData[0]=='O' && receivedMsg->inData[1]=='K'){
+	if (receivedMsg->inData[0] == 'O' && receivedMsg->inData[1] == 'K'){
 		return 0;
 	} else {
 		return -1;
@@ -186,28 +185,28 @@ recvMsg sendPayload(char *inData, int len){
 	- Output: recvMsg is received message
 Important note: inData is a string of hex (i.e., to send a byte of 0xAB, we need inData = {'A', 'B'})
 */
-int WISOL::sendPayload(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg){
+int WISOL::sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg){
 	int receivedResult;
 
-	if ((len > 12) | (len<=0)){
+	if ((len > 12) || (len <= 0)){
 		Serial.println("Payload length must be positive and not be longer than 12 bytes.");
 		clearBuffer();
 		return -1;
 	}
 
-	if (outData==NULL){
+	if (outData == NULL){
 		Serial.println("outData is NULL.");
 		clearBuffer();
 		return -1;
 	}
 
-	if ((downlink != 0) & (downlink != 1)){
+	if ((downlink != 0) || (downlink != 1)){
 		Serial.println("downlink must be 0 or 1.");
 		clearBuffer();
 		return -1;
 	}
 
-	if (receivedMsg==NULL){
+	if (receivedMsg == NULL){
 		Serial.println("receivedMsg is NULL.");
 		clearBuffer();
 		return -1;
@@ -226,22 +225,22 @@ recvMsg sendPayload(char *inData, int len){
 	- Output: recvMsg is received message
 Important note: inData is a string of hex (i.e., to send a byte of 0xAB, we need inData = {'A', 'B'})
 */
-int WISOL::sendPayload(uint8_t *outData, int len, int downlink){
+int WISOL::sendPayload(uint8_t *outData, const uint8_t len, int downlink){
 	int receivedResult;
 
-	if ((len > 12) | (len<=0)){
+	if ((len > 12) || (len <= 0)){
 		Serial.println("Payload length must be positive and not be longer than 12 bytes.");
 		clearBuffer();
 		return -1;
 	}
 
-	if (outData==NULL){
+	if (outData == NULL){
 		Serial.println("outData is NULL.");
 		clearBuffer();
 		return -1;
 	}
 
-	if ((downlink != 0) & (downlink != 1)){
+	if ((downlink != 0) || (downlink != 1)){
 		Serial.println("downlink must be 0 or 1.");
 		clearBuffer();
 		return -1;
@@ -253,22 +252,21 @@ int WISOL::sendPayload(uint8_t *outData, int len, int downlink){
 }
 
 
-
-int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *receivedMsg){
+int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg){
 	static char header[] = "AT$SF=";
-	int headerLen = 6;
+	const uint8_t headerLen = (uint8_t) strlen(header);
 	int actualLen;
 	int sendLen;
 	char* hex_str;
 	int receivedResult;
 
-	if ((outData[len]=='\0') | (outData[len]=='\n')){
+	if ((outData[len] == '\0') || (outData[len] == '\n')){
 		actualLen = len - 1;
 	} else {
 		actualLen = len;
 	}
 
-	hex_str = (char*) malloc (2*actualLen);
+	hex_str = (char*) malloc (2 * actualLen);
 	ASCII2Hex(outData, actualLen, hex_str);
 	sendLen = 2*actualLen;
 
@@ -290,7 +288,7 @@ int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *
 		Serial.print(hex_str[i]); // print payload
 	}
 
-	if (downlink==1){
+	if (downlink == 1){
 		Serial.print(",1");
 	} else {
 
@@ -299,7 +297,7 @@ int WISOL::sendPayloadProcess(uint8_t *outData, int len, int downlink, recvMsg *
 	Serial.println('\n'); // send end terminal
 	free(hex_str); // free hex_str from the memory
 
-	if (receivedMsg!=NULL){
+	if (receivedMsg != NULL){
 		receivedResult = getRecvMsg(receivedMsg, downlink); // Read ACK
 	} else {
 		return 0; // No wait for ack
@@ -315,22 +313,22 @@ recvMsg sendMessage(char *inData, int len){
 	         len is the length of the sending message.
 	- Output: recvMsg is received message
 */
-int WISOL::sendMessage(char *outData, int len, recvMsg *receivedMsg){
+int WISOL::sendMessage(char *outData, const uint8_t len, recvMsg *receivedMsg){
 	int receivedResult;
 
-	if (len<=0){
+	if (len <= 0){
 		Serial.println("Payload length must be positive.");
 		clearBuffer();
 		return -1;
 	}
 
-	if (outData==NULL){
+	if (outData == NULL){
 		Serial.println("outData is NULL.");
 		clearBuffer();
 		return -1;
 	}
 
-	if (receivedMsg==NULL){
+	if (receivedMsg == NULL){
 		Serial.println("receivedMsg is NULL.");
 		clearBuffer();
 		return -1;
@@ -409,7 +407,7 @@ int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 	}
 
 	// Wait for the incomming message
-	while (Serial.available()==0 && count <= countMax) {
+	while ((Serial.available() == 0) && (count <= countMax)) {
 		count++;
 		delay(100);
 	}
@@ -422,7 +420,7 @@ int WISOL::getRecvMsg(recvMsg *receivedMsg, int downlink){
 
 int WISOL::getdownlinkMsg(recvMsg *receivedMsg){
 
-	// Prepare receive messge format
+	// Prepare receive message format
 	receivedMsg->len = Serial.available();
 	receivedMsg->inData = master_receive;
 	if (receivedMsg->len){
@@ -446,8 +444,6 @@ int WISOL::getdownlinkMsg(recvMsg *receivedMsg){
 		return -1;
 	}
 	clearBuffer();
-
-
 }
 
 
