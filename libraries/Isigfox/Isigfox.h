@@ -73,8 +73,8 @@ public:
 		@param recvMsg *receivedMsg		pointer on recMsg structure. if NULL or not used, the function will not block until Sigfox module’s answer reception.
 		@return							0 if succeed and -1, otherwise
     */
-	virtual int sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg) = 0;
-	virtual int sendPayload(uint8_t *outData, const uint8_t len, int downlink) = 0;
+	virtual int sendPayload(uint8_t *outData, const uint8_t len, const int downlink, recvMsg *receivedMsg) = 0;
+	virtual int sendPayload(uint8_t *outData, const uint8_t len, const int downlink) = 0;
 
 
     /** Send a command to the Sigfox module

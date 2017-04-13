@@ -67,9 +67,6 @@ void loop() {
 void Send_Sensors(){
   UINT16_t tempt, photo, pressure;
   INT16_t x_g, y_g, z_g;
-  char sendMsg[20];
-  int sendlength;
-  char sendstr[2];
   acceleration_xyz *xyz_g;
   FLOATUNION_t a_g;
 
@@ -180,13 +177,11 @@ void Send_Pload(uint8_t *sendData, const uint8_t len){
 
 
 void GetDeviceID(){
-  int headerLen = 6;
   recvMsg *RecvMsg;
-  char msg[] = "AT$I=10";
-  int msgLen = 7;
+  const char msg[] = "AT$I=10";
 
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
-  Isigfox->sendMessage(msg, msgLen, RecvMsg);
+  Isigfox->sendMessage(msg, 7, RecvMsg);
 
   Serial.print("Device ID: ");
   for (int i=0; i<RecvMsg->len; i++){

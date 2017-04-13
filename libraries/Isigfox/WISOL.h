@@ -15,6 +15,7 @@
 #define RCZ2 2
 #define RCZ4 4
 
+
 class WISOL : public Isigfox
 {
 public:
@@ -23,8 +24,8 @@ public:
     int initSigfox();
     void configIO(pinIO pin);
 	int testComms();
-	int sendPayload(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
-	int sendPayload(uint8_t *outData, const uint8_t len, int downlink);
+	int sendPayload(uint8_t *outData, const uint8_t len, const int downlink, recvMsg *receivedMsg);
+	int sendPayload(uint8_t *outData, const uint8_t len, const int downlink);
 	int sendMessage(char *outData, const uint8_t len, recvMsg *receivedMsg);
 	int getdownlinkMsg(recvMsg *receivedMsg);
 	int getZone();
@@ -34,12 +35,12 @@ public:
 	int resetMacroChannel();
 private:
 	void Buffer_Init();
-	int getRecvMsg(recvMsg *receivedMsg, int downlink);
+	int getRecvMsg(recvMsg *receivedMsg, const int downlink);
 	int prepareZone();
 	recvMsg goDeepSleep();
 	void wakeDeepSleep();
-	int strCmp(char *in1, char *in2, int len);
-	void printRecv(char* in, int len);
+	int strCmp(char *in1, char *in2, const int len);
+	void printRecv(char* in, const int len);
 	void clearBuffer();
 	void ASCII2Hex(uint8_t* input, int length, char* buf_str);
 	int sendPayloadProcess(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
