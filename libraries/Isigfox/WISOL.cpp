@@ -117,17 +117,14 @@ int WISOL::getZone(){
 		if (strCmp(receivedMsg->inData, "FCC", 3)) {
 			receivedResult = sendMessage("AT$DR?", 6, receivedMsg);
 
-			if (receivedResult != -1) {
-				if (strCmp(receivedMsg->inData, "905200000", 9)) {
-					ret = RCZ2;
-				} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
-					ret = RCZ4;
-				} else {
-					ret = 0;
-				}
+			if (strCmp(receivedMsg->inData, "905200000", 9)) {
+				ret = RCZ2;
+			} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
+				ret = RCZ4;
 			} else {
 				ret = 0;
 			}
+
 		} else if (strCmp(receivedMsg->inData, "ETSI", 4)) {
 			ret = RCZ1;
 		} else {
