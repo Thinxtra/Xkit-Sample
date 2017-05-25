@@ -17,6 +17,10 @@ The libraries should be copied to the location of Arduino libraries on your comp
 
 The development guide with Xkit using the libraries in this project is given in the Xkit Development Guide at http://www.thinxtra.com/xkit/
 
+## Documents
+You can find the schematics of the Xkit in the Documents > Xkit_Schematics.
+If you do not want to use our library to send Sigfox message, you can find the AT command list in Documents > Wisol_Command_and_Schematics. AT commands are used to communicate with the Sigfox module (Wisol) on the Xkit. If you refer using the USB port on the XKit for this purpose, please remember to set the jumpers on the Xkit to the USB-use configuration.
+
 ## License
 
 The libraries is mainly contributed by Thomas Ho of Thinxtra Solution Pty.
