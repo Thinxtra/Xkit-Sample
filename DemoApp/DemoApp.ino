@@ -4,6 +4,8 @@
   Created by Thomas Ho, Thinxtra Solution Pty.
   Febuary 14, 2017.
 
+  Last update on June 23, 2017
+
   Using Adafruit_BMP280_Library and Adafruit_MMA8451_Library
   Copyright (c) 2012, Adafruit Industries
   Modified by Thomas Ho
@@ -18,10 +20,12 @@
 #include <Wire.h>
 #include <math.h>
 #include <SimpleTimer.h>
+#include <avr/wdt.h>
 
 Isigfox *Isigfox = new WISOL();
 Tsensors *tSensors = new Tsensors();
 SimpleTimer timer;
+int watchdogCounter;
 
 typedef union{
     float number;
@@ -44,6 +48,10 @@ void setup() {
 
   Serial.begin(9600);
 
+  // Init watchdog timer
+  watchdogSetup();
+  watchdogCounter = 0;
+  
   // WISOL test
   Isigfox->initSigfox();
   Isigfox->testComms();
@@ -55,13 +63,15 @@ void setup() {
   tSensors->setReed(reedIR);
   tSensors->setButton(buttonIR);
 
-  // Init timer to send a SIgfox message every 10 minutes
+  // Init timer to send a Sigfox message every 10 minutes
   unsigned long sendInterval = 600000;
   timer.setInterval(sendInterval, timeIR);
 }
 
 void loop() {
   timer.run();
+  wdt_reset();
+  watchdogCounter = 0;
 }
 
 void Send_Sensors(){
@@ -190,3 +200,56 @@ void GetDeviceID(){
   Serial.println("");
   free(RecvMsg);
 }
+
+
+void watchdogSetup(void) { // Enable watchdog timer
+  cli();  // disable all interrupts
+  wdt_reset(); // reset the WDT timer
+  /*
+   WDTCSR configuration:
+   WDIE = 1: Interrupt Enable
+   WDE = 1 :Reset Enable
+   WDP3 = 1 :For 8000ms Time-out
+   WDP2 = 1 :For 8000ms Time-out
+   WDP1 = 1 :For 8000ms Time-out
+   WDP0 = 1 :For 8000ms Time-out
+  */
+  // Enter Watchdog Configuration mode:
+  // IF | IE | P3 | CE | E | P2 | P1 | P0
+  WDTCSR |= B00011000;
+  WDTCSR = B01110001;
+//  WDTCSR |= (1<<WDCE) | (1<<WDE);
+//  // Set Watchdog settings:
+//   WDTCSR = (1<<WDIE) | (1<<WDE) | (1<<WDP3) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0);
+  sei();
+}
+
+
+void watchdog_disable() { // Disable watchdog timer
+  cli();  // disable all interrupts
+  WDTCSR |= B00011000;
+  WDTCSR = B00110001;
+  sei();
+}
+
+
+ISR(WDT_vect) // Watchdog timer interrupt.
+{
+// Include your code here - be careful not to use functions they may cause the interrupt to hang and
+// prevent a reset.
+  Serial.print("WD reset: ");
+  Serial.println(watchdogCounter);
+  watchdogCounter++;
+  if (watchdogCounter == 20) { // reset CPU after about 180 s
+      // Reset the CPU next time
+      // Enable WD reset
+      cli();  // disable all interrupts
+      WDTCSR |= B00011000;
+      WDTCSR = B01111001;
+      sei();
+      wdt_reset();
+  } else if (watchdogCounter < 8) {
+    wdt_reset();
+  }
+}
+
