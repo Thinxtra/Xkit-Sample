@@ -1,7 +1,7 @@
 /*
   WISOL.cpp - Interface for Sigfox library.
   Created by Thomas Ho, Thinxtra Solutions Pty.
-  January 19, 2017.
+  July 17, 2017.
   Released into the public domain.
 */
 
@@ -64,6 +64,11 @@ int WISOL::setPublicKey() {
 		Serial.println("Cannot set public key.");
 		clearBuffer();
 		ret = 1;
+	} else {
+		for (int i=0; i<receivedMsg->len; i++){
+			Serial.print(receivedMsg->inData[i]);
+		}
+		Serial.println("");
 	}
 
 	free(receivedMsg);
@@ -82,6 +87,11 @@ int WISOL::setPrivateKey() {
 		Serial.println("Cannot set private key.");
 		clearBuffer();
 		ret = 1;
+	} else {
+		for (int i=0; i<receivedMsg->len; i++){
+			Serial.print(receivedMsg->inData[i]);
+		}
+		Serial.println("");
 	}
 
 	free(receivedMsg);
