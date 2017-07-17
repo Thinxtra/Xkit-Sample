@@ -4,7 +4,7 @@
   Created by Thomas Ho, Thinxtra Solution Pty.
   Febuary 14, 2017.
 
-  Last update on June 23, 2017
+  Last update on July 17, 2017
 
   Using Adafruit_BMP280_Library and Adafruit_MMA8451_Library
   Copyright (c) 2012, Adafruit Industries
@@ -26,6 +26,12 @@ Isigfox *Isigfox = new WISOL();
 Tsensors *tSensors = new Tsensors();
 SimpleTimer timer;
 int watchdogCounter;
+uint8_t buttonCounter;
+uint8_t PublicModeSF;
+uint8_t stateLED;
+uint8_t ledCounter;
+const uint8_t buttonPin = A1;
+const int redLED = 6;
 
 typedef union{
     float number;
@@ -53,6 +59,7 @@ void setup() {
   watchdogCounter = 0;
   
   // WISOL test
+  PublicModeSF = 0;
   Isigfox->initSigfox();
   Isigfox->testComms();
   GetDeviceID();
@@ -61,7 +68,13 @@ void setup() {
   // Init sensors on Thinxtra Module
   tSensors->initSensors();
   tSensors->setReed(reedIR);
+  buttonCounter = 0;
   tSensors->setButton(buttonIR);
+
+  // Init LED
+  stateLED = 0;
+  ledCounter = 0;
+//  pinMode(redLED, INPUT);
 
   // Init timer to send a Sigfox message every 10 minutes
   unsigned long sendInterval = 600000;
@@ -123,12 +136,57 @@ void Send_Sensors(){
 
 void reedIR(){
   Serial.println("Reed");
-  timer.setTimeout(20, Send_Sensors); // send a Sigfox message after get ou IRS
+  timer.setTimeout(50, Send_Sensors); // send a Sigfox message after get ou IRS
 }
 
 void buttonIR(){
-  Serial.println("Button");
-  timer.setTimeout(20, Send_Sensors); // send a Sigfox message after get ou IRS
+  buttonCounter = buttonCounter + 1;
+  if (buttonCounter==1) {
+    timer.setTimeout(2000, checkDoubleClick); // check double click after 2s
+  }
+}
+
+void checkDoubleClick() {
+  if (buttonCounter==1) {
+    Serial.println("Single Press");
+    Send_Sensors();
+  } else {
+    Serial.print("Double Press - ");
+    BlinkLED();
+    pinMode(redLED, OUTPUT);
+    if (PublicModeSF == 0) {
+      Serial.println("Set public key");
+      Isigfox->setPublicKey();
+      PublicModeSF = 1;
+  
+    } else {
+      Serial.println("Set private key");
+      Isigfox->setPrivateKey();
+      PublicModeSF = 0;
+    }
+  }
+  buttonCounter = 0;
+}
+
+
+void BlinkLED() {
+  ledCounter++;
+  if (ledCounter<=6) {
+    if (stateLED == 0){
+      digitalWrite(redLED, HIGH);
+      stateLED = 1;
+      timer.setTimeout(200, BlinkLED);
+    } else {
+      digitalWrite(redLED, LOW);
+      stateLED = 0;
+      timer.setTimeout(200, BlinkLED);
+    }
+  } else {
+    pinMode(redLED, INPUT);
+    ledCounter = 0;
+  }
+  
+  
 }
 
 void timeIR(){
@@ -153,8 +211,6 @@ void getDLMsg(){
 void Send_Pload(uint8_t *sendData, const uint8_t len){
   // No downlink message require
   recvMsg *RecvMsg;
-  Isigfox->resetMacroChannel(); // required to send on first macro channel
-  delay(100);
 
   RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
   Isigfox->sendPayload(sendData, len, 0, RecvMsg);
@@ -252,4 +308,3 @@ ISR(WDT_vect) // Watchdog timer interrupt.
     wdt_reset();
   }
 }
-
