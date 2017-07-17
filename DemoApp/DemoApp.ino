@@ -136,22 +136,27 @@ void Send_Sensors(){
 
 void reedIR(){
   Serial.println("Reed");
-  timer.setTimeout(50, Send_Sensors); // send a Sigfox message after get ou IRS
+  timer.setTimeout(50, Send_Sensors); // send a Sigfox message after get out IRS
 }
 
 void buttonIR(){
-  buttonCounter = buttonCounter + 1;
-  if (buttonCounter==1) {
-    timer.setTimeout(2000, checkDoubleClick); // check double click after 2s
+  if (buttonCounter==0) {
+    timer.setTimeout(500, checkLongPress); // check long click after 0.5s
   }
 }
 
-void checkDoubleClick() {
-  if (buttonCounter==1) {
-    Serial.println("Single Press");
-    Send_Sensors();
+void checkLongPress() {
+  buttonCounter++;
+  if ((buttonCounter < 4)) {
+    if (digitalRead(buttonPin) == 1) {
+      Serial.println("Short Press");
+      Send_Sensors();
+      buttonCounter = 0;
+    } else {
+      timer.setTimeout(500, checkLongPress); // check long click after 0.5s
+    }
   } else {
-    Serial.print("Double Press - ");
+    Serial.println("Long Press");
     BlinkLED();
     pinMode(redLED, OUTPUT);
     if (PublicModeSF == 0) {
@@ -164,8 +169,8 @@ void checkDoubleClick() {
       Isigfox->setPrivateKey();
       PublicModeSF = 0;
     }
+    buttonCounter = 0;
   }
-  buttonCounter = 0;
 }
 
 
