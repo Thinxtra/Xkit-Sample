@@ -383,7 +383,7 @@ int WISOL::prepareZone(){
 	switch (currentZone){
 		case RCZ1:
 		{
-			const char testchar[] = "AT302=15";
+			const char testchar[] = "ATS302=15";
 			receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
 			break;
 		}
