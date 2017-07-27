@@ -303,7 +303,8 @@ int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, const int dow
 		clearBuffer();
 		return -1;
 	}
-
+	
+	delay(20);
 	Buffer_Init();
 	for (int i=0; i<headerLen; i++){
 		Serial.print(header[i]); // print header first
@@ -318,8 +319,8 @@ int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, const int dow
 	} else {
 
 	}
-
-	Serial.println('\n'); // send end terminal
+	
+	Serial.println('\0'); // send end terminal
 	free(hex_str); // free hex_str from the memory
 
 	if (receivedMsg != NULL){
@@ -500,7 +501,29 @@ void WISOL::wakeDeepSleep(){
 }
 
 void WISOL::clearBuffer(){
-	delay(50);
+	Serial.print("\0"); // Make sure there is no unfinished message.
+	switch (currentZone){
+		case RCZ1:
+		{
+			delay(1000);
+			break;
+		}
+		case RCZ2:
+		{
+			delay(50);
+			break;
+		}
+		case RCZ4:
+		{
+			delay(50);
+			break;
+		}
+		default:
+		{
+			
+		}
+	}
+
 	while (Serial.available()!=0){
 		Serial.read();
 		delay(10);
