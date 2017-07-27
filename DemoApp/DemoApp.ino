@@ -59,6 +59,8 @@ void setup() {
   watchdogCounter = 0;
   
   // WISOL test
+  Serial.println(""); // Make a clean restart
+  delay(1000);
   PublicModeSF = 0;
   Isigfox->initSigfox();
   Isigfox->testComms();
@@ -79,6 +81,9 @@ void setup() {
   // Init timer to send a Sigfox message every 10 minutes
   unsigned long sendInterval = 600000;
   timer.setInterval(sendInterval, timeIR);
+
+  Serial.println(""); // Make a clean start
+  delay(1000);
 }
 
 void loop() {
@@ -111,6 +116,7 @@ void Send_Sensors(){
   Serial.print("Acc X: "); Serial.println((float)x_g.number/250);
   Serial.print("Acc Y: "); Serial.println((float)y_g.number/250);
   Serial.print("Acc Z: "); Serial.println((float)z_g.number/250);
+  Serial.print("\0");
   free(xyz_g);
 
   const uint8_t payloadSize = 12; //in bytes
