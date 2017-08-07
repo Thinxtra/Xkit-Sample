@@ -119,27 +119,19 @@ int WISOL::getZone(){
 	recvMsg *receivedMsg;
 	int receivedResult;
 	int ret = 0;
-
+	
 	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
-	receivedResult = sendMessage("AT$I=7", 6, receivedMsg);
+	
+	receivedResult = sendMessage("AT$IF?", 6, receivedMsg);
 
-	if (receivedResult != -1) {
-		if (strCmp(receivedMsg->inData, "FCC", 3)) {
-			receivedResult = sendMessage("AT$DR?", 6, receivedMsg);
-
-			if (strCmp(receivedMsg->inData, "905200000", 9)) {
-				ret = RCZ2;
-			} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
-				ret = RCZ4;
-			} else {
-				ret = 0;
-			}
-
-		} else if (strCmp(receivedMsg->inData, "ETSI", 4)) {
-			ret = RCZ1;
-		} else {
-			ret = 0;
-		}
+	if (strCmp(receivedMsg->inData, "902200000", 9)) {
+		ret = RCZ2;
+	} else if (strCmp(receivedMsg->inData, "920800000", 9)) {
+		ret = RCZ4;
+	} else if (strCmp(receivedMsg->inData, "868130000", 9)) {
+		ret = RCZ1;
+	} else if (strCmp(receivedMsg->inData, "923200000", 9)) {
+		ret = RCZ4;
 	} else {
 		ret = 0;
 	}
@@ -398,6 +390,12 @@ int WISOL::prepareZone(){
 			receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
 			break;
 		}
+		case RCZ3:
+		{
+			const char testchar[] = "ATS302=15";
+			receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
+			break;
+		}	
 		default:
 		{
 			receivedResult = -1;
