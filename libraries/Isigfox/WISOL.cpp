@@ -122,15 +122,15 @@ int WISOL::getZone(){
 	
 	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
 	
-	receivedResult = sendMessage("AT$IF?", 6, receivedMsg);
+	receivedResult = sendMessage("AT$DR?", 6, receivedMsg);
 
-	if (strCmp(receivedMsg->inData, "902200000", 9)) {
+	if (strCmp(receivedMsg->inData, "905200000", 9)) {
 		ret = RCZ2;
-	} else if (strCmp(receivedMsg->inData, "920800000", 9)) {
+	} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
 		ret = RCZ4;
-	} else if (strCmp(receivedMsg->inData, "868130000", 9)) {
+	} else if (strCmp(receivedMsg->inData, "869525000", 9)) {
 		ret = RCZ1;
-	} else if (strCmp(receivedMsg->inData, "923200000", 9)) {
+	} else if (strCmp(receivedMsg->inData, "922200000", 9)) {
 		ret = RCZ4;
 	} else {
 		ret = 0;
