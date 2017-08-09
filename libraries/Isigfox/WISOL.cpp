@@ -289,7 +289,7 @@ int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, const int dow
 
 	clearBuffer();
 	receivedResult = prepareZone();
-
+	
 	if (receivedResult == -1){
 		Serial.println("Prepare zone failed");
 		clearBuffer();
@@ -382,12 +382,14 @@ int WISOL::prepareZone(){
 		}
 		case RCZ2:
 		{
+			checkChangeZone();
 			break;
 		}
 		case RCZ4:
 		{
-			const char testchar[] = "AT$RC";
-			receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
+			checkChangeZone();
+			// const char testchar[] = "AT$RC";
+			// receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
 			break;
 		}
 		case RCZ3:
@@ -405,6 +407,36 @@ int WISOL::prepareZone(){
 	free(receivedMsg);
 	return receivedResult;
 }
+
+
+// check the need of reset the macro channels
+void WISOL::checkChangeZone() {
+	recvMsg *RecvMsg;
+	const char msg[] = "AT$GI?";
+	const char testchar[] = "AT$RC";
+	char X, Y;
+	int receivedResult;
+	
+	RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
+	receivedResult = sendMessage(msg, (int) strlen(msg), RecvMsg);
+	
+	X = RecvMsg->inData[0];
+	Y = RecvMsg->inData[2];
+	
+	for (int i=0; i<RecvMsg->len; i++){
+		Serial.print(RecvMsg->inData[i]);
+	}
+	Serial.println("");
+	
+	if ((X=='0') || (Y<'3')) {
+		receivedResult = sendMessage(testchar, (int) strlen(testchar), RecvMsg);
+	}
+
+	free(RecvMsg);
+	clearBuffer();
+	return receivedResult;
+}
+
 
 // prepare buffer
 void WISOL::Buffer_Init()
