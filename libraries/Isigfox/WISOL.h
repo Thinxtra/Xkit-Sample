@@ -2,6 +2,7 @@
   WISOL.h - Interface for Sigfox library.
   Created by Thomas Ho, Thinxtra Solutions Pty.
   January 19, 2017.
+  Updated August 9, 2017.
   Released into the public domain.
 */
 
@@ -46,6 +47,7 @@ private:
 	void ASCII2Hex(uint8_t* input, int length, char* buf_str);
 	int sendPayloadProcess(uint8_t *outData, const uint8_t len, int downlink, recvMsg *receivedMsg);
 	int getdownlinkMsg(int downlink, recvMsg *receivedMsg);
+	void checkChangeZone();
 
 	static const int BUFFER_SIZE = 40;
 	char master_receive[BUFFER_SIZE] = {0};
