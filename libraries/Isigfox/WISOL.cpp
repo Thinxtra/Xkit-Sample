@@ -119,9 +119,9 @@ int WISOL::getZone(){
 	recvMsg *receivedMsg;
 	int receivedResult;
 	int ret = 0;
-	
+
 	receivedMsg = (recvMsg *)malloc(sizeof(recvMsg));
-	
+
 	receivedResult = sendMessage("AT$DR?", 6, receivedMsg);
 
 	if (strCmp(receivedMsg->inData, "905200000", 9)) {
@@ -129,6 +129,8 @@ int WISOL::getZone(){
 	} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
 		ret = RCZ4;
 	} else if (strCmp(receivedMsg->inData, "0869525000", 10)) {
+		ret = RCZ1;
+	} else if (strCmp(receivedMsg->inData, "869525000", 9)) {
 		ret = RCZ1;
 	} else if (strCmp(receivedMsg->inData, "922200000", 9)) {
 		ret = RCZ3;
@@ -189,7 +191,7 @@ int WISOL::testComms(){
 			ret = -1;
 		}
 	}
-	
+
 	free(receivedMsg);
 	clearBuffer();
 	return ret;
@@ -289,13 +291,13 @@ int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, const int dow
 
 	clearBuffer();
 	receivedResult = prepareZone();
-	
+
 	if (receivedResult == -1){
 		Serial.println("Prepare zone failed");
 		clearBuffer();
 		return -1;
 	}
-	
+
 	delay(20);
 	Buffer_Init();
 	for (int i=0; i<headerLen; i++){
@@ -311,7 +313,7 @@ int WISOL::sendPayloadProcess(uint8_t *outData, const uint8_t len, const int dow
 	} else {
 
 	}
-	
+
 	Serial.println('\0'); // send end terminal
 	free(hex_str); // free hex_str from the memory
 
@@ -397,7 +399,7 @@ int WISOL::prepareZone(){
 			const char testchar[] = "ATS302=15";
 			receivedResult = sendMessage(testchar, (int) strlen(testchar), receivedMsg);
 			break;
-		}	
+		}
 		default:
 		{
 			receivedResult = -1;
@@ -416,18 +418,18 @@ void WISOL::checkChangeZone() {
 	const char testchar[] = "AT$RC";
 	char X, Y;
 	int receivedResult;
-	
+
 	RecvMsg = (recvMsg *)malloc(sizeof(recvMsg));
 	receivedResult = sendMessage(msg, (int) strlen(msg), RecvMsg);
-	
+
 	X = RecvMsg->inData[0];
 	Y = RecvMsg->inData[2];
-	
+
 	for (int i=0; i<RecvMsg->len; i++){
 		Serial.print(RecvMsg->inData[i]);
 	}
 	Serial.println("");
-	
+
 	if ((X=='0') || (Y<'3')) {
 		receivedResult = sendMessage(testchar, (int) strlen(testchar), RecvMsg);
 	}
@@ -550,7 +552,7 @@ void WISOL::clearBuffer(){
 		}
 		default:
 		{
-			
+
 		}
 	}
 
