@@ -133,7 +133,7 @@ int WISOL::getZone(){
 		ret = RCZ2;
 	} else if (strCmp(receivedMsg->inData, "922300000", 9)) {
 		ret = RCZ4;
-	} else if (strCmp(receivedMsg->inData, "869525000", 9)) {
+	} else if (strCmp(receivedMsg->inData, "869525000", 9) || strCmp(receivedMsg->inData, "0869525000", 10)) {
 		ret = RCZ1;
 	} else if (strCmp(receivedMsg->inData, "922200000", 9)) {
 		ret = RCZ3;
