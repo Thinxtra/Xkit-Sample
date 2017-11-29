@@ -49,6 +49,8 @@ typedef union{
 } INT16_t;
 
 void setup() {
+  int flagInit;
+  
   Wire.begin();
   Wire.setClock(100000);
 
@@ -59,14 +61,17 @@ void setup() {
   watchdogCounter = 0;
   
   // WISOL test
+  flagInit = -1;
+  while (flagInit == -1) {
   Serial.println(""); // Make a clean restart
   delay(1000);
   PublicModeSF = 0;
-  Isigfox->initSigfox();
+  flagInit = Isigfox->initSigfox();
   Isigfox->testComms();
   GetDeviceID();
   //Isigfox->setPublicKey(); // set public key for usage with SNEK
-
+  }
+  
   // Init sensors on Thinxtra Module
   tSensors->initSensors();
   tSensors->setReed(reedIR);
