@@ -49,7 +49,7 @@ private:
 	int getdownlinkMsg(int downlink, recvMsg *receivedMsg);
 	void checkChangeZone();
 
-	static const int BUFFER_SIZE = 40;
+	static const int BUFFER_SIZE = 100;
 	char master_receive[BUFFER_SIZE] = {0};
 
 	// char* master_receive;

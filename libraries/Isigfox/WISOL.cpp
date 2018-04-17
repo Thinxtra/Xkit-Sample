@@ -484,8 +484,11 @@ int WISOL::getdownlinkMsg(recvMsg *receivedMsg){
 	// Prepare receive message format
 	receivedMsg->len = Serial.available();
 	receivedMsg->inData = master_receive;
+	for (int i=0; i<BUFFER_SIZE; i++) { // clear master receive buffer
+		master_receive[i] = '\0';
+	}
 	if (receivedMsg->len){
-		for (int i=0; i<receivedMsg->len; i++){
+		for (int i=0; (i < receivedMsg->len) && (i < BUFFER_SIZE); i++){   // FIXED FOR BUFFER OVERRUN!
 			master_receive[i] = Serial.read(); // Read receive message
 		}
 
